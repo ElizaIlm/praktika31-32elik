@@ -35,9 +35,14 @@ namespace SnakeWPF2.Pages
                 else StepCadr = 0;
                 canvas.Children.Clear();
 
-                for (int iPoint = MainWindow.mainWindow.ViewModelGames.SnakesPlayers.Points.Count - 1; iPoint >= 0; iPoint--)
+                // Отрисовываем змею
+                for (int iPoint = 0; iPoint < MainWindow.mainWindow.ViewModelGames.SnakesPlayers.Points.Count; iPoint++)
                 {
                     Snakes.Point SnakePoint = MainWindow.mainWindow.ViewModelGames.SnakesPlayers.Points[iPoint];
+
+                    // Копируем точку для анимации, чтобы не изменять оригинал
+                    Snakes.Point animatedPoint = new Snakes.Point(SnakePoint.X, SnakePoint.Y);
+
                     if (iPoint != 0)
                     {
                         // Получаем следующую точку змеи
@@ -52,11 +57,11 @@ namespace SnakeWPF2.Pages
                                 // если кадр чётный
                                 if (StepCadr % 2 == 0)
                                     // смещаем в одну сторону
-                                    SnakePoint.Y -= 1;
+                                    animatedPoint.Y -= 1;
                             }
                             else
                                 // смещаем в другую сторону
-                                SnakePoint.Y += 1;
+                                animatedPoint.Y += 1;
                         }
                         // Если точка находится по вертикали
                         else if (SnakePoint.Y > NextSnakePoint.Y || SnakePoint.Y < NextSnakePoint.Y)
@@ -67,62 +72,56 @@ namespace SnakeWPF2.Pages
                                 // если кадр чётный
                                 if (StepCadr % 2 == 0)
                                     // смещаем в одну сторону
-                                    SnakePoint.X -= 1;
+                                    animatedPoint.X -= 1;
                             }
                             else
                                 // смещаем в другую сторону
-                                SnakePoint.X += 1;
+                                animatedPoint.X += 1;
                         }
                         else
                         {
                             // если кадр не чётный
                             if (StepCadr % 2 == 0)
                                 // смещаем в одну сторону
-                                SnakePoint.X += 1;
+                                animatedPoint.X += 1;
                             else
                                 // смещаем в другую сторону
-                                SnakePoint.X -= 1;
+                                animatedPoint.X -= 1;
                         }
-
-                        Brush Color;
-                        if (iPoint == 0)
-                            Color = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 127, 14));
-                        else
-                            Color = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 198, 19));
-
-                        Ellipse ellipse = new Ellipse()
-                        {
-                            Width = 20,
-                            Height = 20,
-                            Margin = new Thickness(SnakePoint.X - 10, SnakePoint.Y - 10, 0, 0),
-                            Fill = Color,
-                            Stroke = Brushes.Black
-                        };
-                        canvas.Children.Add(ellipse);
                     }
+
+                    Brush Color;
+                    if (iPoint == 0)
+                        Color = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 127, 14));
+                    else
+                        Color = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 198, 19));
+
+                    Ellipse ellipse = new Ellipse()
+                    {
+                        Width = 20,
+                        Height = 20,
+                        Margin = new Thickness(animatedPoint.X - 10, animatedPoint.Y - 10, 0, 0),
+                        Fill = Color,
+                        Stroke = Brushes.Black
+                    };
+                    canvas.Children.Add(ellipse);
+                }
+
+                // Отрисовываем яблоко (один раз, вне цикла)
+                if (MainWindow.mainWindow.ViewModelGames.Points != null)
+                {
                     Ellipse apple = new Ellipse()
                     {
                         Width = 20,
                         Height = 20,
-                        Margin = new Thickness(SnakePoint.X - 10, SnakePoint.Y - 10, 0, 0),
+                        Margin = new Thickness(
+                           MainWindow.mainWindow.ViewModelGames.Points.X - 10,
+                           MainWindow.mainWindow.ViewModelGames.Points.Y - 10, 0, 0),
                         Fill = Brushes.Red,
                         Stroke = Brushes.Black
                     };
                     canvas.Children.Add(apple);
                 }
-
-                //ImageBrush myBrush = new ImageBrush();
-                //myBrush.ImageSource = new BitmapImage(new Uri($"pack://application:,,,/Image/apple.png"));
-                //Ellipse points = new Ellipse()
-                //{
-                //    Width = 40,
-                //    Height = 40,
-                //    Margin = new Thickness(
-                //       MainWindow.mainWindow.ViewModelGames.Points.X - 20,
-                //       MainWindow.mainWindow.ViewModelGames.Points.Y - 20, 0, 0),
-                //    Fill = myBrush
-                //};
-                //canvas.Children.Add(points);
             });
         }
     }

@@ -30,12 +30,16 @@ namespace SnakeWPF2
         public UdpClient receivingUdpClient;
         public Pages.Home Home = new Pages.Home();
         public Pages.Game Game = new Pages.Game();
+
         public MainWindow()
         {
             InitializeComponent();
             mainWindow = this;
+            this.KeyUp += EventKeyUp;
+            this.Closing += QuitApplication;
             OpenPage(Home);
         }
+
         public void StartReceiver()
         {
             tRec = new Thread(new ThreadStart(Receiver));
@@ -91,7 +95,10 @@ namespace SnakeWPF2
                     }
                     else
                     {
-                        Game.CreateUI();
+                        Dispatcher.Invoke(() =>
+                        {
+                            Game.CreateUI();
+                        });
                     }
                 }
             }
@@ -101,6 +108,7 @@ namespace SnakeWPF2
                 Debug.WriteLine("Возникло исключение: " + ex.ToString() + "\n" + ex.Message);
             }
         }
+
         public static void Send(string datagram)
         {
             UdpClient sender = new UdpClient();
@@ -119,6 +127,7 @@ namespace SnakeWPF2
                 sender.Close();
             }
         }
+
         private void EventKeyUp(object sender, KeyEventArgs e)
         {
             if (!string.IsNullOrEmpty(ViewModelUserSettings.IPAddress) &&
@@ -126,30 +135,22 @@ namespace SnakeWPF2
                 (ViewModelGames != null && !ViewModelGames.SnakesPlayers.GameOver))
             {
                 if (e.Key == Key.Up)
-
                     Send($"Up|{JsonConvert.SerializeObject(ViewModelUserSettings)}");
-
                 else if (e.Key == Key.Down)
-
                     Send($"Down|{JsonConvert.SerializeObject(ViewModelUserSettings)}");
-
                 else if (e.Key == Key.Left)
-
                     Send($"Left|{JsonConvert.SerializeObject(ViewModelUserSettings)}");
-
                 else if (e.Key == Key.Right)
-
                     Send($"Right|{JsonConvert.SerializeObject(ViewModelUserSettings)}");
-
-
-
-
             }
         }
+
         private void QuitApplication(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            receivingUdpClient.Close();
-            tRec.Abort();
+            if (receivingUdpClient != null)
+                receivingUdpClient.Close();
+            if (tRec != null && tRec.IsAlive)
+                tRec.Abort();
         }
     }
 }
