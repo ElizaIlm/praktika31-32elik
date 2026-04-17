@@ -74,44 +74,60 @@ namespace Snake2
                 Console.WriteLine("Команды сервера:");
                 while (true)
                 {
-                    byte[] receiveBytes = receivingUdpClient.Receive(
-                    ref RemoteIpEndPoint);
+                    byte[] receiveBytes = receivingUdpClient.Receive(ref RemoteIpEndPoint);
                     string returnData = Encoding.UTF8.GetString(receiveBytes);
 
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Получил команду: " + returnData.ToString());
+                    Console.WriteLine("Получил команду: " + returnData);
 
-                    if (returnData.ToString().Contains("/start"))
+                    // Проверяем, является ли команда /start
+                    if (returnData.StartsWith("/start"))
                     {
-                        string[] dataMessage = returnData.ToString().Split('|');
-                        ViewModelUserSettings viewModelUserSettings = JsonConvert.DeserializeObject<ViewModelUserSettings>(dataMessage[1]);
+                        // Убираем "/start" из начала
+                        string jsonPart = returnData.Substring(6); // удаляем "/start"
+
+                        // Если после /start идет | - пропускаем его тоже
+                        if (jsonPart.StartsWith("|"))
+                        {
+                            jsonPart = jsonPart.Substring(1);
+                        }
+
+                        ViewModelUserSettings viewModelUserSettings = JsonConvert.DeserializeObject<ViewModelUserSettings>(jsonPart);
+
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine($"Подключился пользователь: {viewModelUserSettings.IPAddress}:{viewModelUserSettings.Port}");
+
                         remoteIPAddress.Add(viewModelUserSettings);
                         viewModelUserSettings.IdSnake = AddSnake();
-                        viewModelGames[viewModelUserSettings.IdSnake].IdSnake = viewModelUserSettings.IdSnake;
-                    }
-                    else
-                    {
-                        string[] dataMessage = returnData.ToString().Split('|');
-                        ViewModelUserSettings viewModelUserSettings = JsonConvert.DeserializeObject<ViewModelUserSettings>(dataMessage[1]);
-                        int IdPlayer = -1;
-                        IdPlayer = remoteIPAddress.FindIndex(x => x.IPAddress == viewModelUserSettings.IPAddress &&
-                        x.Port == viewModelUserSettings.Port);
-                        if (IdPlayer != -1)
+
+                        // Проверяем, что индекс существует
+                        if (viewModelUserSettings.IdSnake >= 0 && viewModelUserSettings.IdSnake < viewModelGames.Count)
                         {
-                            if (dataMessage[0] == "Up" &&
-                            viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Down)
-                                viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Up;
-                            else if (dataMessage[0] == "Down" &&
-                            viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Up)
-                                viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Down;
-                            else if (dataMessage[0] == "Left" &&
-                            viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Right)
-                                viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Left;
-                            else if (dataMessage[0] == "Right" &&
-                            viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Left)
-                                viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Right;
+                            viewModelGames[viewModelUserSettings.IdSnake].IdSnake = viewModelUserSettings.IdSnake;
+                        }
+                    }
+                    else if (returnData.Contains('|'))
+                    {
+                        string[] dataMessage = returnData.Split('|');
+                        if (dataMessage.Length >= 2)
+                        {
+                            ViewModelUserSettings viewModelUserSettings = JsonConvert.DeserializeObject<ViewModelUserSettings>(dataMessage[1]);
+                            int IdPlayer = remoteIPAddress.FindIndex(x => x.IPAddress == viewModelUserSettings.IPAddress &&
+                            x.Port == viewModelUserSettings.Port);
+
+                            if (IdPlayer != -1 && IdPlayer < viewModelGames.Count && viewModelGames[IdPlayer]?.SnakesPlayers != null)
+                            {
+                                var snake = viewModelGames[IdPlayer].SnakesPlayers;
+
+                                if (dataMessage[0] == "Up" && snake.direction != Snakes.Direction.Down)
+                                    snake.direction = Snakes.Direction.Up;
+                                else if (dataMessage[0] == "Down" && snake.direction != Snakes.Direction.Up)
+                                    snake.direction = Snakes.Direction.Down;
+                                else if (dataMessage[0] == "Left" && snake.direction != Snakes.Direction.Right)
+                                    snake.direction = Snakes.Direction.Left;
+                                else if (dataMessage[0] == "Right" && snake.direction != Snakes.Direction.Left)
+                                    snake.direction = Snakes.Direction.Right;
+                            }
                         }
                     }
                 }
@@ -119,9 +135,8 @@ namespace Snake2
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Возникло исключение" + ex.ToString() + "\n" + ex.Message);
+                Console.WriteLine("Возникло исключение: " + ex.ToString() + "\n" + ex.Message);
             }
-
         }
         public static int AddSnake()
         {

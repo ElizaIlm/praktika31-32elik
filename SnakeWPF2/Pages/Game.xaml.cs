@@ -100,20 +100,29 @@ namespace SnakeWPF2.Pages
                         };
                         canvas.Children.Add(ellipse);
                     }
+                    Ellipse apple = new Ellipse()
+                    {
+                        Width = 20,
+                        Height = 20,
+                        Margin = new Thickness(SnakePoint.X - 10, SnakePoint.Y - 10, 0, 0),
+                        Fill = Brushes.Red,
+                        Stroke = Brushes.Black
+                    };
+                    canvas.Children.Add(apple);
                 }
 
-                ImageBrush myBrush = new ImageBrush();
-                myBrush.ImageSource = new BitmapImage(new Uri($"pack://application:,,,/Image/apple.png"));
-                Ellipse points = new Ellipse()
-                {
-                    Width = 40,
-                    Height = 40,
-                    Margin = new Thickness(
-                       MainWindow.mainWindow.ViewModelGames.Points.X - 20,
-                       MainWindow.mainWindow.ViewModelGames.Points.Y - 20, 0, 0),
-                    Fill = myBrush
-                };
-                canvas.Children.Add(points);
+                //ImageBrush myBrush = new ImageBrush();
+                //myBrush.ImageSource = new BitmapImage(new Uri($"pack://application:,,,/Image/apple.png"));
+                //Ellipse points = new Ellipse()
+                //{
+                //    Width = 40,
+                //    Height = 40,
+                //    Margin = new Thickness(
+                //       MainWindow.mainWindow.ViewModelGames.Points.X - 20,
+                //       MainWindow.mainWindow.ViewModelGames.Points.Y - 20, 0, 0),
+                //    Fill = myBrush
+                //};
+                //canvas.Children.Add(points);
             });
         }
     }

@@ -124,6 +124,10 @@
       <Project>{ccfe8d17-6cf6-49e1-9d51-b6c9074df728}</Project>
       <Name>Common2</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Snake2\Snake2.csproj">
+      <Project>{cea7a09f-fbad-4b55-9810-a8502d8fe3a2}</Project>
+      <Name>Snake2</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Image\apple.png" />

@@ -25,7 +25,9 @@ namespace SnakeWPF2.Pages
         public Home()
         {
             InitializeComponent();
+
         }
+
         private void StartGame(object sender, RoutedEventArgs e)
         {
             if (MainWindow.mainWindow.receivingUdpClient != null)
